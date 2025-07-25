@@ -1,0 +1,330 @@
+<section class="content">
+  <div class="content-block">
+    @for (breadscrum of breadscrums; track breadscrum) {
+    <div class="block-header">
+      <!-- breadcrumb -->
+      <app-breadcrumb [title]="breadscrum.title" [items]="breadscrum.items" [active_item]="breadscrum.active">
+      </app-breadcrumb>
+    </div>
+    }
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="materialTableHeader">
+            <div class="left">
+              <ul class="header-buttons-left ms-0">
+                <li class="tbl-title">
+                  <h2>All Devices</h2>
+                </li>
+                <li class="tbl-search-box">
+                  <label for="search-input"><i class="material-icons search-icon">search</i></label>
+                  <input placeholder="Search" type="text" #filter (keyup)="applyFilter($event)"
+                    class="browser-default search-field" aria-label="Search box">
+                </li>
+              </ul>
+            </div>
+            <div class="right">
+              <ul class="tbl-export-btn">
+                <li class="tbl-header-btn">
+                  <div class="m-l-10">
+                    <button mat-icon-button color="primary" (click)="select.open()" matTooltip="Show/Hide Column">
+                      <mat-icon>filter_list</mat-icon>
+                      <mat-select #select [(ngModel)]="filter.value" style="width: 200px; display: table;"
+                        class="column-filter">
+                        <span class="table-column-label">Show/Hide Column</span>
+                        @for (cd of columnDefinitions; track cd; let i = $index) {
+                        <div>
+                          <mat-option>
+                            <mat-checkbox (click)="$event.stopPropagation()" [(ngModel)]="cd.visible" color="primary">
+                              {{cd.label}}
+                            </mat-checkbox>
+                          </mat-option>
+                        </div>
+                        }
+                      </mat-select>
+                    </button>
+                  </div>
+                </li>
+                <li class="tbl-header-btn">
+                  <div class="m-l-10">
+                    <button mat-icon-button (click)="addNew()" class="col-green" matTooltip="Add">
+                      <mat-icon>add_circle_outline</mat-icon>
+                    </button>
+                  </div>
+                </li>
+                <li class="tbl-header-btn">
+                  <div class="m-l-10">
+                    <button mat-icon-button (click)="refresh()" matTooltip="Refresh">
+                      <mat-icon>refresh</mat-icon>
+                    </button>
+                  </div>
+                </li>
+                <!-- <li class="tbl-header-btn">
+                  <div class="m-l-10" [hidden]=!selection.hasValue()>
+                    <button mat-icon-button [hidden]=!selection.hasValue() (click)="removeSelectedRows()"
+                      class="col-red" matTooltip="Delete">
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  </div>
+                </li> -->
+                <li>
+                  <div class="export-button m-l-10">
+                    <button mat-icon-button (click)="exportExcel()" class="col-blue" matTooltip="Xlsx Download">
+                      <mat-icon class="material-icons-outlined">file_download</mat-icon>
+                    </button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="overflow-auto">
+            <div class="responsive_table">
+              <table mat-table [dataSource]="dataSource" matSort class="mat-cell advance-table">
+                <!-- Checkbox Column -->
+                <ng-container matColumnDef="select">
+                  <mat-header-cell *matHeaderCellDef>
+                    <mat-checkbox (change)="$event ? masterToggle() : null"
+                      [checked]="selection.hasValue() && isAllSelected()" color="primary"
+                      [indeterminate]="selection.hasValue() && !isAllSelected()" [ngClass]="'tbl-checkbox'">
+                    </mat-checkbox>
+                  </mat-header-cell>
+                  <mat-cell *matCellDef="let row">
+                    <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+                      [checked]="selection.isSelected(row)" [ngClass]="'tbl-checkbox'" color="primary">
+                    </mat-checkbox>
+                  </mat-cell>
+                </ng-container>
+                
+                @for (column of columnDefinitions; track column) {
+                <!-- Skip rendering if column.label is "select" or "action" -->
+                @if (column.type === 'check' || column.type === 'actionBtn') {
+                <!-- Skip this column -->
+                } @else {
+                <ng-container [matColumnDef]="column.def">
+                  <mat-header-cell *matHeaderCellDef mat-sort-header>
+                    <span class="truncate-text">{{ column.label }}</span>
+                  </mat-header-cell>
+                  <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)">
+                    <span class="mobile-label">{{ column.label }}:</span>
+                    <span class="truncate-text">{{ row[column.def] }}</span>
+                  </mat-cell>
+                </ng-container>
+                }
+                }
+                
+                
+
+                <!-- Action Buttons Column -->
+                    <ng-container matColumnDef="actions">
+                    <mat-header-cell class="pr-0" *matHeaderCellDef>Actions</mat-header-cell>
+                    <mat-cell *matCellDef="let row; let i=index;" class="pr-0">
+                        <button mat-icon-button color="accent col-green" matTooltip="Device Logs"
+                                (click)="$event.stopPropagation(); openDeviceLogs(row)"
+                                class="tbl-action-btn">
+                          <mat-icon>visibility</mat-icon>
+                        </button>
+
+                        <button mat-icon-button color="warn col-red" matTooltip="Password List" (click)="$event.stopPropagation()" (click)="openDevicePasswordModal(row)"
+                        class="tbl-action-btn">
+                        <!-- <app-feather-icons [icon]="'key'" [class]="'tbl-fav-edit'"></app-feather-icons> -->
+                         <mat-icon>key</mat-icon>
+                        </button>
+                        <button mat-icon-button class="col-red" color="warn" matTooltip="Create Password" (click)="$event.stopPropagation()" (click)="openDevicePasswordCteateModal(row)"
+                        class="tbl-action-btn">
+                        <app-feather-icons [icon]="'edit'" [class]="'tbl-fav-edit'"></app-feather-icons>
+                        </button>
+                        <!-- <button mat-icon-button color="accent" (click)="$event.stopPropagation()" (click)="deleteItem(row)"
+                        class="tbl-action-btn">
+                        <app-feather-icons [icon]="'trash-2'" [class]="'tbl-fav-delete'"></app-feather-icons>
+                        </button> -->
+                    </mat-cell>
+                    </ng-container>
+
+                    <mat-header-row *matHeaderRowDef="getDisplayedColumns()"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: getDisplayedColumns()" >
+                    </mat-row>
+                </table>
+
+                <!-- Loading Spinner -->
+                <div *ngIf="isLoading" class="tbl-spinner">
+                    <mat-spinner diameter="40"></mat-spinner>
+                </div>
+
+                <!-- No Data Message -->
+                <div *ngIf="!isLoading && dataSource.data.length === 0" class="no-results">
+                    No results
+                </div>
+
+                <mat-paginator [length]="dataSource.filteredData.length"
+                                [pageSize]="10"
+                                [pageSizeOptions]="[5, 10, 25, 100]">
+                </mat-paginator>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<ng-template #DeviceLogsModal let-modal>
+    <!-- <loading [loading]="loading" [type]="'loader-bubble'"></loading> -->
+    <div class="modal-header d-b">
+      <h4 class="modal-title pull-left" id="modal-basic-title">Device Logs</h4>
+      <button type="button" class="close pull-right" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <table class="table">
+          <thead>
+        <tr>
+          <th>Lock Id</th>
+          <th>Name</th>
+          <th>Passcode</th>
+          <th>Lock date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let d of allDeviceLogsData">
+          <td>{{d.lockId}}</td>
+          <td>{{d.username}}</td>
+          <td>{{d.keyboardPwd}}</td>
+          <td>{{d.lockDate | date: 'medium' }}</td>
+        </tr>
+      </tbody>
+        </table>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-primary" (click)="modal.close('close click')">Close</button>
+      <!-- <button class="btn btn-outline-primary btn-sm ml-10 font-weight-bold mt-2" (click)="saveUploadDocFile()"> Save </button> -->
+      <!-- <button class="btn btn-info ladda-button "
+         (click)="saveDeviceDetails()"><i class="fa fa-check" *ngIf="!loading"></i> Save</button> -->
+    </div>
+</ng-template>
+
+<ng-template #DevicePasswordListModal let-modal >
+    <!-- <loading [loading]="loading" [type]="'loader-bubble'"></loading> -->
+     <div class="d-flex justify-content-center my-3" *ngIf="loading">
+        <mat-spinner diameter="30"></mat-spinner>
+      </div>
+
+    <div class="modal-header d-b">
+      <h4 class="modal-title pull-left" id="modal-basic-title">Device Password List</h4>
+      <button type="button" class="close pull-right" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <div class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Password</th>
+              <th>Status</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of allPasswordData">
+              <td>{{p.keyboardPwdName}}</td>
+              <td>{{p.keyboardPwd}}</td>
+              <td>{{p.status}}</td>
+              <td>{{p.startDate | date: 'medium'}}</td>
+              <td>{{p.endDate | date: 'medium'}}</td>
+              <td>
+                <!-- <button class="btn btn-danger btn-icon" ngbTooltip="Delete" (click)="deletePasscode(p, modal)">
+                  <i class="fa fa-trash"></i>
+                </button> -->
+                <button mat-icon-button color="accent" (click)="$event.stopPropagation()" (click)="deletePasscode(p, modal)"
+                      class="tbl-action-btn">
+                      <app-feather-icons [icon]="'trash-2'" [class]="'tbl-fav-delete'"></app-feather-icons>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-primary" (click)="modal.close('close click')">Close</button>
+    </div>
+</ng-template> 
+
+<ng-template #DeviceCreatePasswordModal let-modal>
+      <!-- <div class="d-flex justify-content-center my-3" *ngIf="loading">
+        <mat-spinner diameter="30"></mat-spinner>
+      </div> -->
+      <app-loader [loading]="loading" [type]="'loader-bubble'"></app-loader>
+    <div class="modal-header d-b">
+      <h4 class="modal-title pull-left" id="modal-basic-title">Device Create Password</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="passwordCreateForm">
+          <div class="row">
+            <div class="col-12">
+              <label for="name">Name</label>
+              <input type="text" class="form-control" formControlName="keyboardPwdName" placeholder="Name">
+            </div>
+             <div class="col-12 mt-2">
+              <label for="name">Passcode</label>
+              <input type="number" class="form-control" formControlName="keyboardPwd" placeholder="Passcode">
+            </div>
+            <div class="col-6 mt-2">
+              <label for="startdate">Start Date</label>
+               <input type="datetime-local" [(ngModel)]="selectedStartDate" formControlName="startDate" class="border p-2 w-full rounded" />
+            </div>
+            <div class="col-6 mt-2">
+              <label for="startdate">End Date</label>
+               <input type="datetime-local" [(ngModel)]="selectedEndDate" formControlName="endDate" class="border p-2 w-full rounded" />
+
+            </div>
+          </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-danger" (click)="modal.close('close click')">Close</button>
+      <button class="btn btn-info ladda-button "
+         (click)="saveDevicePassword()"><i class="fa fa-check" *ngIf="!loading"></i> Save</button>
+    </div>
+  </ng-template>
+
+
+<!-- <ng-template #DeviceCreatePasswordModal let-modal>
+  <div mat-dialog-content style="padding: 24px; max-width: 600px;">
+    <form [formGroup]="passwordCreateForm" class="d-flex flex-column gap-4">
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Name</mat-label>
+        <input matInput type="text" formControlName="keyboardPwdName" placeholder="Enter name" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Passcode</mat-label>
+        <input matInput type="number" formControlName="keyboardPwd" placeholder="Enter passcode" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Start Date</mat-label>
+        <input matInput type="datetime-local" [(ngModel)]="selectedStartDate" formControlName="startDate" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>End Date</mat-label>
+        <input matInput type="datetime-local" [(ngModel)]="selectedEndDate" formControlName="endDate" />
+      </mat-form-field>
+
+
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button mat-raised-button color="primary" (click)="saveDevicePassword()">Save</button>
+        <button mat-stroked-button color="warn" (click)="modal.close('close click')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</ng-template> -->
+
+
+

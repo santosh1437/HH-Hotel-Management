@@ -1,0 +1,6 @@
+<div class="custom-loader-overlay" *ngIf="loading">
+  <div [ngSwitch]="type">
+    <div *ngSwitchCase="'loader-bubble'" class="bubble-loader"></div>
+    <div *ngSwitchDefault class="default-loader"></div>
+  </div>
+</div>
