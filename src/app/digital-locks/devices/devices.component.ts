@@ -123,9 +123,9 @@ export class DevicesComponent implements OnInit{
 
     breadscrums = [
     {
-      title: 'Device Locks',
+      title: 'Digital Locks',
       items: ['Devices'],
-      active: 'Device Locks',
+      active: 'Digital Locks',
     },
   ];
 

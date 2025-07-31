@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import {
   ChartComponent,
   ApexAxisChartSeries,
@@ -21,7 +21,7 @@ import {
 } from 'ng-apexcharts';
 import { NgScrollbar } from 'ngx-scrollbar';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { BreadcrumbComponent } from '@shared/components/breadcrumb/breadcrumb.component';
 import { StatisticCard2Component } from '@shared/components/statistic-card2/statistic-card2.component';
@@ -29,10 +29,13 @@ import { MatCardModule } from '@angular/material/card';
 import { AttendanceChartComponent } from '@shared/components/attendance-chart/attendance-chart.component';
 import { ChartCard4Component } from '@shared/components/chart-card4/chart-card4.component';
 import { EventCardComponent } from '@shared/components/event-card/event-card.component';
-import { ScheduleCardComponent } from '@shared/components/schedule-card/schedule-card.component';
-import { TableCardComponent } from '@shared/components/table-card/table-card.component';
-import { EmpStatusComponent } from '@shared/components/emp-status/emp-status.component';
-import { ChartCard1Component } from '@shared/components/chart-card1/chart-card1.component';
+import { LocksService } from 'app/service/locks.service';
+import { take } from 'rxjs';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { CommonModule } from '@angular/common';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 export type chartOptions = {
   series: ApexAxisChartSeries;
   chart: ApexChart;
@@ -54,6 +57,22 @@ export type chartOptions = {
   series2: ApexNonAxisChartSeries;
 };
 
+
+interface BookingData {
+  room_id: string;
+  room_type_name: string;
+  booking_date: string;
+  occupied_rooms: number;
+}
+
+interface DayBooking {
+  date: Date;
+  bookings: BookingData[];
+  totalOccupiedRooms: number;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+}
+
 @Component({
   selector: 'app-main',
   templateUrl: './main.component.html',
@@ -70,18 +89,39 @@ export type chartOptions = {
     AttendanceChartComponent,
     ChartCard4Component,
     EventCardComponent,
-    ScheduleCardComponent,
-    TableCardComponent,
-    EmpStatusComponent,
-    ChartCard1Component,
+    MatTableModule,
+    CommonModule,
+    MatTooltipModule,
+    MatProgressSpinnerModule
+    
   ],
 })
 export class MainComponent implements OnInit {
   @ViewChild('chart') chart!: ChartComponent;
+  @ViewChild(MatMenuTrigger) contextMenu?: MatMenuTrigger;
+  @ViewChild('calenderModal',{static: true}) calenderModal!: TemplateRef<any> 
   public performanceRateChartOptions!: Partial<chartOptions>;
 
   title2 = 'Admission chart';
   subtitle2 = 'New admission in the last 5 years in the school';
+
+  contextMenuPosition = { x: '0px', y: '0px' };
+  isLoading: boolean = false;
+
+  monthlyChannelOverAllBookings: any[] = []; // original data
+  tableData: any[] = [];                     // transformed data
+  dynamicColumns: string[] = [];             // for mat-table
+  channelSet = new Set<string>(); 
+  channelGroups: string[] = [];
+  displayedColumns: string[] = [];
+  headerRow1: string[] = [];
+  headerRow2: string[] = [];
+ roomTypeGroups: string[] = [];
+  displayedRoomColumns: string[] = [];
+  tableRoomData: any[] = [];
+  monthlyRoomOverAllBookings: any[] = [];
+  dataSourceRoom = new MatTableDataSource<any>();
+  roomTableData: any[] = [];
 
   breadscrums = [
     {
@@ -90,12 +130,27 @@ export class MainComponent implements OnInit {
       active: 'Dashboard 1',
     },
   ];
-  constructor() {
+  channelOverBookings: any;
+  overallSummary: any;
+  DayBookingData: any[]= [];
+  // monthlyRoomOverAllBookings: any;
+  constructor(
+    private lockService: LocksService,
+        private modal: NgbModal,
+    
+  ) {
     //constructor
   }
 
+  @Input() title: string = '';
+  @Input() value: number | string = 0;
+  @Input() description: string = '';
+  @Input() img: string = '';
+  @Input() arrowIcon: string = '';
+
   ngOnInit() {
     this.chart3();
+    this.getPMSReport();
   }
 
   // Events
@@ -288,13 +343,24 @@ export class MainComponent implements OnInit {
     // Add more items as needed
   ];
 
-  sportColumnDefinitions = [
-    { def: 'name', label: 'Patient Name', type: 'text' },
-    { def: 'assignedCoach', label: 'Assigned Coach', type: 'text' },
-    { def: 'date', label: 'Date', type: 'date' },
-    { def: 'sportName', label: 'Sport Name', type: 'text' },
-    { def: 'actions', label: 'Actions', type: 'actionBtn' },
+  ChannelOvearallBookingsColumnDefinitions = [
+    { def: 'channel_name', label: 'Channel Name', type: 'text' , visible:'true'},
+    { def: 'total_bookings', label: 'Bookings', type: 'text', visible:'true' },
+    { def: 'total_room_rate', label: 'Amount', type: 'text', visible:'true' },
+    { def: 'total_paid', label: 'Paid', type: 'text', visible:'true' },
+    { def: 'total_due', label: 'Due', type: 'text', visible:'true' },
   ];
+
+  RoomOvearAllBookingsColumnDefinitions = [
+    { def: 'room_type_name', label: 'Room Name', type: 'text' , visible:'true'},
+    { def: 'total_bookings', label: 'Bookings', type: 'text', visible:'true' },
+    { def: 'total_room_rate', label: 'Amount', type: 'text', visible:'true' },
+    { def: 'total_paid', label: 'Paid', type: 'text', visible:'true' },
+    { def: 'total_due', label: 'Due', type: 'text', visible:'true' },
+  ];
+
+  dataSource = new MatTableDataSource<any>([]);
+  dataSource1 = new MatTableDataSource<any>([]);
 
   // Sport Achievements end
 
@@ -384,7 +450,7 @@ export class MainComponent implements OnInit {
   ];
 
   studentColumnDefinitions = [
-    { def: 'name', label: 'Student Name', type: 'text' },
+    { def: 'name', label: 'Student Name', type: 'text', },
     { def: 'phone', label: 'Phone', type: 'phone' },
     { def: 'address', label: 'Address', type: 'address' },
     { def: 'branch', label: 'Branch', type: 'text' },
@@ -393,5 +459,179 @@ export class MainComponent implements OnInit {
     { def: 'actions', label: 'Actions', type: 'actionBtn' },
   ];
 
+   getChannelColumns(): string[] {
+    return this.ChannelOvearallBookingsColumnDefinitions
+      .filter((cd) => cd.visible)
+      .map((cd) => cd.def);
+  }
+
+  getRoomColumns(): string[] {
+  return this.RoomOvearAllBookingsColumnDefinitions
+    .filter(col => col.type !== 'check' && col.type !== 'actionBtn')
+    .map(col => col.def);
+}
+
   // New Student List start
+  getPMSReport(){
+    this.lockService.getPMSReport().pipe(take(1)).subscribe({
+      next:(res:any)=>{
+        console.log(res);
+        this.channelOverBookings = res.ChannelOvearallBookings;
+        this.dataSource.data = this.channelOverBookings;
+        this.dataSource1.data = res.RoomOvearAllBookings;
+        this.monthlyChannelOverAllBookings  = res.monthlyChannelOverAllBookings;
+        this.monthlyRoomOverAllBookings = res.monthlyRoomOverAllBookings;
+        this.overallSummary = res.OverAllSummary;
+        this.DayBookingData = res.CalendarDateBookings;
+        this.transformDataForTable();
+        this.transformRoomTableData();
+        this.updateCalendar();
+        console.log("this.overallSummary", this.overallSummary);
+      },
+      error:(err)=>console.log(err)
+    })
+  }
+
+    transformDataForTable(): void {
+    const data = this.monthlyChannelOverAllBookings;
+    const grouped = new Map<string, any>();
+    const channels = new Set<string>();
+
+    data.forEach(entry => {
+      const month = entry.month;
+      const channel = entry.channel_name;
+
+      channels.add(channel);
+
+      if (!grouped.has(month)) {
+        grouped.set(month, { month });
+      }
+
+      const row = grouped.get(month);
+      row[`${channel}_bookings`] = entry.total_bookings;
+      row[`${channel}_rate`] = entry.total_room_rate;
+    });
+
+    this.channelGroups = Array.from(channels);
+    this.tableData = Array.from(grouped.values());
+
+    // Header Rows
+    this.headerRow1 = ['monthGroup', ...this.channelGroups.map(c => c + '_group')];
+    this.headerRow2 = ['month', ...this.channelGroups.flatMap(c => [c + '_bookings', c + '_rate'])];
+    this.displayedColumns = this.headerRow2;
+  }
+
+   transformRoomTableData(): void {
+  const groupedMap = new Map<string, any>();
+  const roomSet = new Set<string>();
+
+  this.monthlyRoomOverAllBookings.forEach(item => {
+    const { month, room_type_name, total_bookings, total_room_rate } = item;
+    roomSet.add(room_type_name);
+
+    if (!groupedMap.has(month)) {
+      groupedMap.set(month, { month });
+    }
+
+    const row = groupedMap.get(month);
+    row[room_type_name + '_bookings'] = total_bookings;
+    row[room_type_name + '_rate'] = total_room_rate;
+  });
+
+  this.roomTypeGroups = Array.from(roomSet);
+  this.roomTableData = Array.from(groupedMap.values());
+}
+
+
+// ****************calender start**************************
+  currentDate = new Date();
+  currentMonth = '';
+  currentYear = 0;
+  calendarDays: DayBooking[] = [];
+  selectedDay: DayBooking | null = null;
+  
+  dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  updateCalendar() {
+    this.currentMonth = this.monthNames[this.currentDate.getMonth()];
+    this.currentYear = this.currentDate.getFullYear();
+    this.generateCalendarDays();
+  }
+
+  generateCalendarDays() {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth();
+    
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
+    const days: DayBooking[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    for (let i = 0; i < 42; i++) {
+      const currentDay = new Date(startDate);
+      currentDay.setDate(startDate.getDate() + i);
+      
+      const dayBookings = this.getBookingsForDate(currentDay);
+      const totalOccupied = dayBookings.reduce((sum, booking) => sum + booking.occupied_rooms, 0);
+      
+      days.push({
+        date: currentDay,
+        bookings: dayBookings,
+        totalOccupiedRooms: totalOccupied,
+        isCurrentMonth: currentDay.getMonth() === month,
+        isToday: currentDay.getTime() === today.getTime()
+      });
+    }
+    
+    this.calendarDays = days;
+  }
+
+  getBookingsForDate(date: Date): BookingData[] {
+    const dateString = date.toISOString().split('T')[0];
+    return this.DayBookingData.filter((booking:any) => booking.booking_date === dateString);
+  }
+
+  previousMonth() {
+    this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+    this.updateCalendar();
+    this.selectedDay = null;
+  }
+
+  nextMonth() {
+    this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+    this.updateCalendar();
+    this.selectedDay = null;
+  }
+
+  selectDay(day: DayBooking) {
+    if (day.bookings.length > 0) {
+      this.selectedDay = day;
+    }
+    this.modal.open(this.calenderModal, { size: 'lg' })
+  }
+
+// ******************calender end***************************
+
+  
+
+    onContextMenu(event: MouseEvent, item: any) {
+      event.preventDefault();
+      this.contextMenuPosition = {
+        x: `${event.clientX}px`,
+        y: `${event.clientY}px`,
+      };
+      if (this.contextMenu) {
+        this.contextMenu.menuData = { item };
+        this.contextMenu.menu?.focusFirstItem('mouse');
+        this.contextMenu.openMenu();
+      }
+    }
 }

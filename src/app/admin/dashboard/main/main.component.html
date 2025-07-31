@@ -10,24 +10,21 @@
     <!-- Widgets -->
     <div class="row">
       <div class="col-lg-3 col-md-3 col-sm-12">
-        <app-statistic-card2 title="Total Sales" value="1500" description="Total sales this month"
+        <app-statistic-card2 title="Total Sales" [value]="overallSummary[0].total_amount" description="Total sales Overall"
           img="assets/images/banner/img1.png" arrowIcon="trending_up">
         </app-statistic-card2>
       </div>
       <div class="col-lg-3 col-md-3 col-sm-12">
-        <app-statistic-card2 title="Total Courses" value="125" description="Total course this month"
+        <app-statistic-card2 title="Total Bookings" [value]="overallSummary[0].total_bookings" description="Total Bookings Overall"
           img="assets/images/banner/img2.png" arrowIcon="trending_down">
         </app-statistic-card2>
       </div>
       <div class="col-lg-3 col-md-3 col-sm-12">
-        <app-statistic-card2 title="Total Teachers" value="89" description="12% Higher Then
-        Last Month" img="assets/images/banner/img3.png" arrowIcon="trending_up">
+        <app-statistic-card2 title="Total Paid" [value]="overallSummary[0].total_paid" description="Total Paid Overall" img="assets/images/banner/img3.png" arrowIcon="trending_up">
         </app-statistic-card2>
       </div>
       <div class="col-lg-3 col-md-3 col-sm-12">
-        <app-statistic-card2 title="Fees Collection" value="$48,697" description="22% Less Then
-        Last
-        Month" img="assets/images/banner/img4.png" arrowIcon="trending_down">
+        <app-statistic-card2 title="Total Due" [value]="overallSummary[0].total_due" description="Total Due Overall" img="assets/images/banner/img4.png" arrowIcon="trending_down">
         </app-statistic-card2>
       </div>
     </div>
@@ -51,7 +48,7 @@
       </div>
     </div>
 
-    <div class="row clearfix">
+    <!-- <div class="row clearfix">
       <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
         <mat-card>
           <mat-card-header class="header-menu">
@@ -83,50 +80,253 @@
       <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
         <app-chart-card1 [title]="title2" [subtitle]="subtitle2"></app-chart-card1>
       </div>
-    </div>
+    </div> -->
     <div class="row clearfix">
-      <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+      <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
         <mat-card>
           <mat-card-header class="header-style">
-            <mat-card-title>Sport Achievements</mat-card-title>
-            <a mat-button color="primary" href="#" (click)="$event.preventDefault();">View All</a>
+            <mat-card-title>Channel Overall Bookings</mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <ng-scrollbar style="height: 350px" visibility="hover">
-              <app-table-card [dataSource]="sportData" [columnDefinitions]="sportColumnDefinitions"></app-table-card>
+              <!-- <app-table-card [dataSource]="sportData" [columnDefinitions]="ChannelOvearallBookingsColumnDefinitions"></app-table-card> -->
+               <table mat-table [dataSource]="dataSource" matSort class="mat-cell advance-table">
+               @for (column of ChannelOvearallBookingsColumnDefinitions; track column) {
+                <!-- Skip rendering if column.label is "select" or "action" -->
+                @if (column.type === 'check' || column.type === 'actionBtn') {
+                <!-- Skip this column -->
+                } @else {
+                      <ng-container [matColumnDef]="column.def">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>
+                          <span class="truncate-text">{{ column.label }}</span>
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)" [matTooltip]="row.name">
+                          <span class="mobile-label">{{ column.label }}:</span>
+                          <span class="truncate-text" [matTooltip]="row[column.def]">
+                            {{ row[column.def]}}
+                          </span>
+                        </mat-cell>
+                      </ng-container>
+                    }
+                }
+                
+
+                    <mat-header-row *matHeaderRowDef="getChannelColumns()"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: getChannelColumns()" >
+                    </mat-row>
+
+                <!-- Loading Spinner -->
+                <div *ngIf="isLoading" class="tbl-spinner">
+                    <mat-spinner diameter="40"></mat-spinner>
+                </div>
+              </table>
+                <!-- No Data Message -->
+                <div *ngIf="!isLoading && dataSource.data.length === 0" class="no-results">
+                    No results
+                </div>
             </ng-scrollbar>
           </mat-card-content>
         </mat-card>
       </div>
-      <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+       <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
         <mat-card>
           <mat-card-header class="header-style">
-            <mat-card-title>Teacher List</mat-card-title>
-            <a mat-button color="primary" href="#" (click)="$event.preventDefault();">View All</a>
+            <mat-card-title>Room Overall Bookings</mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <ng-scrollbar style="height: 350px" visibility="hover">
-              <app-emp-status></app-emp-status>
+              <!-- <app-table-card [dataSource]="sportData" [columnDefinitions]="ChannelOvearallBookingsColumnDefinitions"></app-table-card> -->
+               <table mat-table [dataSource]="dataSource1" matSort class="mat-cell advance-table">
+               @for (column of RoomOvearAllBookingsColumnDefinitions; track column) {
+                <!-- Skip rendering if column.label is "select" or "action" -->
+                @if (column.type === 'check' || column.type === 'actionBtn') {
+                <!-- Skip this column -->
+                } @else {
+                      <ng-container [matColumnDef]="column.def">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header sticky>
+                          <span class="truncate-text">{{ column.label }}</span>
+                        </mat-header-cell>
+                        <mat-cell *matCellDef="let row" (contextmenu)="onContextMenu($event, row)" [matTooltip]="row.name">
+                          <span class="mobile-label">{{ column.label }}:</span>
+                          <span class="truncate-text" [matTooltip]="row[column.def]">
+                            {{ row[column.def]}}
+                          </span>
+                        </mat-cell>
+                      </ng-container>
+                    }
+                } 
+
+                    <mat-header-row *matHeaderRowDef="getRoomColumns(); sticky: true"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: getRoomColumns()" >
+                    </mat-row>
+
+                <!-- Loading Spinner -->
+                <div *ngIf="isLoading" class="tbl-spinner">
+                    <mat-spinner diameter="40"></mat-spinner>
+                </div>
+              </table>
+                <!-- No Data Message -->
+                <div *ngIf="!isLoading && dataSource.data.length === 0" class="no-results">
+                    No results
+                </div>
             </ng-scrollbar>
           </mat-card-content>
         </mat-card>
       </div>
     </div>
     <div class="row clearfix">
-      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-        <mat-card>
-          <mat-card-header class="header-style">
-            <mat-card-title>New Student List</mat-card-title>
-            <a mat-button color="primary" href="#" (click)="$event.preventDefault();">View All</a>
-          </mat-card-header>
-          <mat-card-content>
-            <ng-scrollbar style="height: 450px" visibility="hover">
-              <app-table-card [dataSource]="studentData"
-                [columnDefinitions]="studentColumnDefinitions"></app-table-card>
-            </ng-scrollbar>
-          </mat-card-content>
-        </mat-card>
+      <mat-card>
+        <mat-card-header class="header-style">
+          <mat-card-title>Monthly Channel Bookings</mat-card-title>
+        </mat-card-header>
+    
+        <mat-card-content>
+          <ng-scrollbar style="height: 450px" visibility="hover">
+            <table class="full-border-table table">
+              <thead class="sticky-top">
+                <tr>
+                  <th rowspan="2">Month</th>
+                  <ng-container *ngFor="let channel of channelGroups">
+                    <th colspan="2">{{ channel }}</th>
+                  </ng-container>
+                </tr>
+                <tr>
+                  <ng-container *ngFor="let channel of channelGroups">
+                    <th>Bookings</th>
+                    <th>Amount</th>
+                  </ng-container>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of tableData">
+                  <td>{{ row.month }}</td>
+                  <ng-container *ngFor="let channel of channelGroups">
+                    <td>{{ row[channel + '_bookings'] || '-' }}</td>
+                    <td>{{ row[channel + '_rate'] || '-' }}</td>
+                  </ng-container>
+                </tr>
+              </tbody>
+            </table>
+    
+          </ng-scrollbar>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="row clearfix">
+      <mat-card>
+        <mat-card-header class="header-style">
+          <mat-card-title>Monthly Room Bookings</mat-card-title>
+        </mat-card-header>
+    
+        <mat-card-content>
+          <ng-scrollbar style="height: 450px" visibility="hover">
+            <table class="full-border-table table">
+              <thead class="sticky-top">
+                <tr>
+                  <th rowspan="2">Month</th>
+                  <ng-container *ngFor="let room of roomTypeGroups">
+                    <th colspan="2">{{ room }}</th>
+                  </ng-container>
+                </tr>
+                <tr>
+                  <ng-container *ngFor="let room of roomTypeGroups">
+                    <th>Bookings</th>
+                    <th>Amount</th>
+                  </ng-container>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of roomTableData">
+                  <td>{{ row.month }}</td>
+                  <ng-container *ngFor="let room of roomTypeGroups">
+                    <td>{{ row[room + '_bookings'] || '-' }}</td>
+                    <td>{{ row[room + '_rate'] || '-' }}</td>
+                  </ng-container>
+                </tr>
+              </tbody>
+            </table>
+          </ng-scrollbar>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="row clearfix">
+      <div class="col-12">
+      <div class="calendar-container">
+      <div class="calendar-header">
+        <button class="nav-button" (click)="previousMonth()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+          </svg>
+        </button>
+        <h2 class="month-title">{{ currentMonth }} {{ currentYear }}</h2>
+        <button class="nav-button" (click)="nextMonth()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="calendar-grid">
+        <div class="day-header" *ngFor="let day of dayHeaders">{{ day }}</div>
+        
+        <div 
+          *ngFor="let day of calendarDays" 
+          class="calendar-day"
+          [class.other-month]="!day.isCurrentMonth"
+          [class.today]="day.isToday"
+          [class.has-bookings]="day.bookings.length > 0"
+          [class.light-booking]="day.totalOccupiedRooms >= 1 && day.totalOccupiedRooms <= 5"
+          [class.medium-booking]="day.totalOccupiedRooms >= 6 && day.totalOccupiedRooms <= 10"
+          [class.heavy-booking]="day.totalOccupiedRooms > 10"
+          (click)="selectDay(day)"
+        >
+          <div class="day-number">{{ day.date.getDate() }}</div>
+          <div class="booking-info" *ngIf="day.bookings.length > 0">
+            <div class="booking-count">{{ day.bookings.length }} rooms</div>
+            <div class="occupied-count">{{ day.totalOccupiedRooms }} occupied</div>
+          </div>
+        </div>
+      </div>
       </div>
     </div>
+    </div>
+
   </div>
 </section>
+
+<ng-template #calenderModal let-modal>
+    <div class="modal-header d-b">
+      <h4 class="modal-title pull-left" id="modal-basic-title">Bookings List</h4>
+      <button type="button" class="close pull-right" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="calendar-container">
+      <div class="booking-details" *ngIf="selectedDay && selectedDay.bookings.length > 0">
+        <h3>Bookings for {{ selectedDay.date.toLocaleDateString() }}</h3>
+        <div class="booking-summary">
+          <span class="total-rooms">{{ selectedDay.bookings.length }} rooms booked</span>
+          <span class="total-occupied">{{ selectedDay.totalOccupiedRooms }} total occupied</span>
+        </div>
+        <div class="booking-list">
+          <div 
+            *ngFor="let booking of selectedDay.bookings" 
+            class="booking-item"
+          >
+            <div class="room-info">
+              <div class="room-name">{{ booking.room_type_name }}</div>
+              <div class="room-id">Room ID: {{ booking.room_id }}</div>
+            </div>
+            <div class="occupied-badge">{{ booking.occupied_rooms }} occupied</div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-danger" (click)="modal.close('close click')">Close</button>
+    </div>
+</ng-template>

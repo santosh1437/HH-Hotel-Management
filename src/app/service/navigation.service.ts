@@ -33,20 +33,20 @@ export class NavigationService {
           // 'STUDENT-DASHBOARD': 'Student Dashboard'
         }
       },
-      'FROUNT-OFFICE': {
-        TEXT: 'Frount Office',
-        LIST: {
-          ADMISSION: 'Admission Inquiry',
-          VISITORS: 'Visitors Book',
-          COMPLAINTS: 'Complaints'
-        }
-      },
-      'DIGITAL-LOCKS': {
-        TEXT: 'Digital Locks',
-        LIST: {
-          DEVICES: 'Devices',
-        }
-      },
+      // 'FROUNT-OFFICE': {
+      //   TEXT: 'Frount Office',
+      //   LIST: {
+      //     ADMISSION: 'Admission Inquiry',
+      //     VISITORS: 'Visitors Book',
+      //     COMPLAINTS: 'Complaints'
+      //   }
+      // },
+      // 'DIGITAL-LOCKS': {
+      //   TEXT: 'Digital Locks',
+      //   LIST: {
+      //     DEVICES: 'Devices',
+      //   }
+      // },
     }
   };
 
@@ -66,7 +66,7 @@ export class NavigationService {
     },
     {
       path: '',
-      title: 'MENUITEMS.DASHBOARD.TEXT',
+      title: 'Dashboard',
       iconType: 'material-icons-outlined',
       icon: 'space_dashboard',
       class: 'menu-toggle',
@@ -77,7 +77,7 @@ export class NavigationService {
       submenu: [
         {
           path: '/admin/dashboard/main',
-          title: 'MENUITEMS.DASHBOARD.LIST.DASHBOARD1',
+          title: 'Dashboard',
           iconType: '',
           icon: '',
           class: 'ml-menu',
@@ -89,80 +89,140 @@ export class NavigationService {
         },
       ]
     },
+    // {
+    //   path: '',
+    //   title: 'MENUITEMS.FROUNT-OFFICE.TEXT',
+    //   iconType: 'material-icons-outlined',
+    //   icon: 'display_settings',
+    //   class: 'menu-toggle',
+    //   groupTitle: false,
+    //   badge: '',
+    //   badgeClass: '',
+    //   role: ['Admin'],
+    //   submenu: [
+    //     {
+    //       path: '/admin/frount-office/admission-inquiry',
+    //       title: 'MENUITEMS.FROUNT-OFFICE.LIST.ADMISSION',
+    //       iconType: '',
+    //       icon: '',
+    //       class: 'ml-menu',
+    //       groupTitle: false,
+    //       badge: '',
+    //       badgeClass: '',
+    //       role: [''],
+    //       submenu: []
+    //     },
+    //     {
+    //       path: '/admin/frount-office/visitors',
+    //       title: 'MENUITEMS.FROUNT-OFFICE.LIST.VISITORS',
+    //       iconType: '',
+    //       icon: '',
+    //       class: 'ml-menu',
+    //       groupTitle: false,
+    //       badge: '',
+    //       badgeClass: '',
+    //       role: [''],
+    //       submenu: []
+    //     },
+    //     {
+    //       path: '/admin/frount-office/complaints',
+    //       title: 'MENUITEMS.FROUNT-OFFICE.LIST.COMPLAINTS',
+    //       iconType: '',
+    //       icon: '',
+    //       class: 'ml-menu',
+    //       groupTitle: false,
+    //       badge: '',
+    //       badgeClass: '',
+    //       role: [''],
+    //       submenu: []
+    //     }
+    //   ]
+    // },
+    // {
+    //   path: '',
+    //   title: 'Digital Locks',
+    //   iconType: 'material-icons-outlined',
+    //   icon: 'display_settings',
+    //   class: 'menu-toggle',
+    //   groupTitle: false,
+    //   badge: '',
+    //   badgeClass: '',
+    //   role: ['Admin'],
+    //   submenu: [
+    //     {
+    //       path: '/digital-locks/devices',
+    //       title: 'Devices',
+    //       iconType: '',
+    //       icon: '',
+    //       class: 'ml-menu',
+    //       groupTitle: false,
+    //       badge: '',
+    //       badgeClass: '',
+    //       role: [''],
+    //       submenu: []
+    //     },
+    //     {
+    //       path: '/digital-locks/properties',
+    //       title: 'Properties',
+    //       iconType: '',
+    //       icon: '',
+    //       class: 'ml-menu',
+    //       groupTitle: false,
+    //       badge: '',
+    //       badgeClass: '',
+    //       role: [''],
+    //       submenu: []
+    //     },
+    //     {
+    //       path: '/digital-locks/bookings',
+    //       title: 'Bookings',
+    //       iconType: '',
+    //       icon: '',
+    //       class: 'ml-menu',
+    //       groupTitle: false,
+    //       badge: '',
+    //       badgeClass: '',
+    //       role: [''],
+    //       submenu: []
+    //     }
+    //   ]
+    // }
     {
-      path: '',
-      title: 'MENUITEMS.FROUNT-OFFICE.TEXT',
+      path: '/digital-locks/devices',
+      title: 'Digital Locks',
       iconType: 'material-icons-outlined',
-      icon: 'display_settings',
-      class: 'menu-toggle',
+      icon: 'lock',
+      class: '',
       groupTitle: false,
       badge: '',
       badgeClass: '',
       role: ['Admin'],
-      submenu: [
-        {
-          path: '/admin/frount-office/admission-inquiry',
-          title: 'MENUITEMS.FROUNT-OFFICE.LIST.ADMISSION',
-          iconType: '',
-          icon: '',
-          class: 'ml-menu',
-          groupTitle: false,
-          badge: '',
-          badgeClass: '',
-          role: [''],
-          submenu: []
-        },
-        {
-          path: '/admin/frount-office/visitors',
-          title: 'MENUITEMS.FROUNT-OFFICE.LIST.VISITORS',
-          iconType: '',
-          icon: '',
-          class: 'ml-menu',
-          groupTitle: false,
-          badge: '',
-          badgeClass: '',
-          role: [''],
-          submenu: []
-        },
-        {
-          path: '/admin/frount-office/complaints',
-          title: 'MENUITEMS.FROUNT-OFFICE.LIST.COMPLAINTS',
-          iconType: '',
-          icon: '',
-          class: 'ml-menu',
-          groupTitle: false,
-          badge: '',
-          badgeClass: '',
-          role: [''],
-          submenu: []
-        }
-      ]
+      submenu: []
     },
     {
-      path: '',
-      title: 'MENUITEMS.DIGITAL-LOCKS.TEXT',
+      path: '/digital-locks/properties',
+      title: 'Properties',
       iconType: 'material-icons-outlined',
-      icon: 'display_settings',
-      class: 'menu-toggle',
+      icon: 'business',
+      class: '',
       groupTitle: false,
       badge: '',
       badgeClass: '',
       role: ['Admin'],
-      submenu: [
-        {
-          path: '/digital-locks/devices',
-          title: 'MENUITEMS.DIGITAL-LOCKS.LIST.DEVICES',
-          iconType: '',
-          icon: '',
-          class: 'ml-menu',
-          groupTitle: false,
-          badge: '',
-          badgeClass: '',
-          role: [''],
-          submenu: []
-        }
-      ]
-    }
+      submenu: []
+    },
+    {
+      path: '/digital-locks/bookings',
+      title: 'Bookings',
+      iconType: 'material-icons-outlined',
+      icon: 'book',
+      class: '',
+      groupTitle: false,
+      badge: '',
+      badgeClass: '',
+      role: ['Admin'],
+      submenu: []
+    },
     // Add more routes if needed...
   ];
 

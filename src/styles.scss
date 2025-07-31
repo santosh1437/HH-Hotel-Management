@@ -1,5 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 
+html {
+  overflow-y: scroll;
+}
 .snackbar-success .mdc-snackbar__surface{
   background-color: #4caf50 !important;
   color: white !important;
@@ -16,6 +19,9 @@
   color: white !important;
 }
 
+.hasError{
+    color: rgb(169, 20, 20);
+}
 
 
 .close {

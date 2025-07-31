@@ -24,5 +24,13 @@ export class LocksService {
   deletePasscode(data:any){
     return this.http.post(this.API_URL + "ttlock/delete-passcode", data);
   }
-
+  getProperties(){
+    return this.http.get(this.API_URL + "ttlock/getProperties");
+  }
+  getBookings(){
+    return this.http.get(this.API_URL + "ttlock/getBookings");
+  }
+   getPMSReport(){
+    return this.http.get(this.API_URL + "ttlock/getPMSReport");
+  }
 }
