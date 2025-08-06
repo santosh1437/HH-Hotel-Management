@@ -78,7 +78,8 @@ export class DevicesComponent implements OnInit{
     { def: 'id', label: 'ID', type: 'text', visible: false },
     { def: 'lockId', label: 'Lock Id', type: 'text', visible: true },
     { def: 'lockName', label: 'Device Name', type: 'text', visible: true },
-    { def: 'lockAlias', label: 'Alias', type: 'email', visible: true },
+    { def: 'lockAlias', label: 'Alias', type: 'text', visible: true },
+    { def: 'timezoneRawOffset', label: 'Time Zone', type: 'text', visible: true },
     { def: 'actions', label: 'Actions', type: 'actionBtn', visible: true },
   ];
 
@@ -153,6 +154,15 @@ export class DevicesComponent implements OnInit{
       .filter((cd) => cd.visible)
       .map((cd) => cd.def);
   }
+
+  getTimezoneCountry(offset: number): string {
+  switch (offset) {
+    case 19800000: return 'India'; 
+    case 14400000: return 'UAE';
+    default: return 'Unknown';
+  }
+}
+
 
   loadData() {
     this.lockService.locks().subscribe({

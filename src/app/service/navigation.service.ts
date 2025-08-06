@@ -223,6 +223,18 @@ export class NavigationService {
       role: ['Admin'],
       submenu: []
     },
+    {
+      path: '/digital-locks/staff',
+      title: 'Staff',
+      iconType: 'material-icons-outlined',
+      icon: 'groups',
+      class: '',
+      groupTitle: false,
+      badge: '',
+      badgeClass: '',
+      role: ['Admin'],
+      submenu: []
+    },
     // Add more routes if needed...
   ];
 

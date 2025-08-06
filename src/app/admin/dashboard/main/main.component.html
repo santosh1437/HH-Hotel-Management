@@ -11,20 +11,22 @@
     <div class="row">
       <div class="col-lg-3 col-md-3 col-sm-12">
         <app-statistic-card2 title="Total Sales" [value]="overallSummary[0].total_amount" description="Total sales Overall"
-          img="assets/images/banner/img1.png" arrowIcon="trending_up">
+          img="assets/images/dashboard/sales.png" arrowIcon="trending_up">
         </app-statistic-card2>
       </div>
       <div class="col-lg-3 col-md-3 col-sm-12">
         <app-statistic-card2 title="Total Bookings" [value]="overallSummary[0].total_bookings" description="Total Bookings Overall"
-          img="assets/images/banner/img2.png" arrowIcon="trending_down">
+          img="assets/images/dashboard/booking.png" arrowIcon="trending_down">
         </app-statistic-card2>
       </div>
       <div class="col-lg-3 col-md-3 col-sm-12">
-        <app-statistic-card2 title="Total Paid" [value]="overallSummary[0].total_paid" description="Total Paid Overall" img="assets/images/banner/img3.png" arrowIcon="trending_up">
+        <app-statistic-card2 title="Total Paid" [value]="overallSummary[0].total_paid" description="Total Paid Overall"
+         img="assets/images/dashboard/paid.png" arrowIcon="trending_up">
         </app-statistic-card2>
       </div>
       <div class="col-lg-3 col-md-3 col-sm-12">
-        <app-statistic-card2 title="Total Due" [value]="overallSummary[0].total_due" description="Total Due Overall" img="assets/images/banner/img4.png" arrowIcon="trending_down">
+        <app-statistic-card2 title="Total Due" [value]="overallSummary[0].total_due" description="Total Due Overall"
+         img="assets/images/dashboard/due.png" arrowIcon="trending_down">
         </app-statistic-card2>
       </div>
     </div>

@@ -35,6 +35,7 @@
     "@fullcalendar/list": "^6.1.15",
     "@fullcalendar/timegrid": "^6.1.15",
     "@ng-bootstrap/ng-bootstrap": "^14.2.0",
+    "@ng-select/ng-select": "^14.0.0",
     "@ngx-loading-bar/core": "^7.0.0",
     "@ngx-loading-bar/router": "^7.0.0",
     "@ngx-translate/core": "^16.0.3",

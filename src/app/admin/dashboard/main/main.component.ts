@@ -612,11 +612,14 @@ export class MainComponent implements OnInit {
   }
 
   selectDay(day: DayBooking) {
-    if (day.bookings.length > 0) {
-      this.selectedDay = day;
-    }
-    this.modal.open(this.calenderModal, { size: 'lg' })
+  if (day.bookings.length > 0) {
+    this.selectedDay = day;
+    this.modal.open(this.calenderModal, { size: 'lg' });
+  } else {
+    this.selectedDay = null;
   }
+}
+
 
 // ******************calender end***************************
 
